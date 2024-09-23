@@ -1,0 +1,19 @@
+{
+    "name": "rinimisini/php-utilities",
+    "description": "PHP implementation of different JavaScript built-in classes",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Rinimisini\\PhpUtilities\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Rini Misini"
+        }
+    ],
+    "require": {
+        "php": "^8.0"
+    }
+}
