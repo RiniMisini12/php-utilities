@@ -175,6 +175,73 @@ class Set implements Countable, IteratorAggregate
     }
 
     /**
+     * Returns an array of the objects in the Set.
+     *
+     * @return array<object> An array of objects in the S.
+     */
+    public function toArray(): array
+    {
+        $objects = [];
+        foreach ($this->items as $object => $_) {
+            $objects[] = $object;
+        }
+        return $objects;
+    }
+
+    /**
+     * Checks if this set is a subset of another set.
+     */
+    public function isSubsetOf(Set $set): bool
+    {
+        foreach ($this as $item) {
+            if (!$set->has($item)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Checks if this set is a superset of another set.
+     */
+    public function isSupersetOf(Set $set): bool
+    {
+        return $set->isSubsetOf($this);
+    }
+
+    /**
+     * Checks if this set is equal to another set.
+     */
+    public function isEqual(Set $set): bool
+    {
+        return $this->size() === $set->size() && $this->isSubsetOf($set);
+    }
+
+    /**
+     * Performs a callback for each element in the Set.
+     *
+     * @param callable $callback The callback function to execute. Receives the element as a parameter.
+     * @return void
+     */
+    public function forEach(callable $callback): void
+    {
+        foreach ($this->items as $item) {
+            $callback($item);
+        }
+    }
+
+    /**
+     * Checks if the Set is empty.
+     *
+     * @return bool True if the Set is empty, false otherwise.
+     */
+    public function isEmpty(): bool
+    {
+        return empty($this->items);
+    }
+
+
+    /**
      * Serializes the set object for storage or transmission.
      *
      * @return array An array representation of the set's elements.
