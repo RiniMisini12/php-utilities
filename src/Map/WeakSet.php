@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Rinimisini\PhpUtilities;
+namespace Rinimisini\PhpUtilities\Map;
 
 use Countable;
 use IteratorAggregate;
-use ArrayIterator;
+use Rinimisini\PhpUtilities\Iterator\WeakSetIterator;
 use WeakMap;
 
 /**
@@ -95,11 +95,11 @@ class WeakSet implements Countable, IteratorAggregate
     /**
      * Returns an iterator over the objects in the WeakSet.
      *
-     * @return ArrayIterator<object> An iterator over the objects.
+     * @return WeakSetIterator An iterator over the objects in the WeakSet.
      */
-    public function getIterator(): ArrayIterator
+    public function getIterator(): WeakSetIterator
     {
-        return new ArrayIterator($this->toArray());
+        return new WeakSetIterator($this->weakMap);
     }
 
     /**
@@ -230,5 +230,18 @@ class WeakSet implements Countable, IteratorAggregate
     public function isEqual(WeakSet $set): bool
     {
         return $this->count() === $set->count() && $this->isSubsetOf($set);
+    }
+
+    /**
+     * Utility function to manually trigger garbage collection.
+     *
+     * This method invokes the garbage collector to collect and clean up any
+     * cyclic references or unused objects that are no longer needed.
+     *
+     * @return int The number of collected cycles.
+     */
+    public function triggerGarbageCollection(): int
+    {
+        return gc_collect_cycles();
     }
 }

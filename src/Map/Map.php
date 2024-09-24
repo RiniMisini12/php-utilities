@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Rinimisini\PhpUtilities;
+namespace Rinimisini\PhpUtilities\Map;
 
+use ArrayIterator;
 use Countable;
 use IteratorAggregate;
-use ArrayIterator;
 use JsonException;
 
 /**
@@ -40,11 +40,9 @@ class Map implements Countable, IteratorAggregate
         $keyHash = $this->getKeyHash($key);
 
         if (isset($this->keyIndexMap[$keyHash])) {
-            // Update existing entry
             $index = $this->keyIndexMap[$keyHash];
             $this->entries[$index][1] = $value;
         } else {
-            // Add new entry
             $this->entries[] = [$key, $value];
             $this->keyIndexMap[$keyHash] = array_key_last($this->entries);
         }
@@ -102,7 +100,6 @@ class Map implements Countable, IteratorAggregate
             $index = $this->keyIndexMap[$keyHash];
             unset($this->entries[$index], $this->keyIndexMap[$keyHash]);
 
-            // Reindex entries and keyIndexMap
             $this->entries = array_values($this->entries);
             $this->rebuildKeyIndexMap();
 

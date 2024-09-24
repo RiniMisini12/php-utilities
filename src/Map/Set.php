@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Rinimisini\PhpUtilities;
+namespace Rinimisini\PhpUtilities\Map;
 
+use ArrayIterator;
 use Countable;
 use IteratorAggregate;
-use ArrayIterator;
+use Rinimisini\PhpUtilities\Iterator\SetIterator;
 
 /**
  * A PHP Set implementation similar to JavaScript's Set.
@@ -93,20 +94,20 @@ class Set implements Countable, IteratorAggregate
     }
 
     /**
-     * Returns an iterator for the set.
-     * This allows the set to be used in foreach loops and other iteration contexts.
+     * Returns the custom iterator for the set.
      *
-     * @return ArrayIterator An iterator over the elements of the set.
+     * @return SetIterator An iterator over the elements of the set.
      */
-    public function getIterator(): ArrayIterator
+    public function getIterator(): SetIterator
     {
-        return new ArrayIterator(array_values($this->items));
+        return new SetIterator($this->items);
     }
 
     /**
-     * Generates a unique key for a value in the set.
+     * Generates a fast unique key for a value in the set.
+     * Uses optimized hashing based on the type of value.
      * For objects, this uses spl_object_hash to generate a unique key.
-     * For other types, it serializes the value.
+     * For strings and scalar values, it uses crc32 for fast hashing.
      *
      * @param mixed $value The value to generate a unique key for.
      * @return string The unique key representing the value.
@@ -116,7 +117,32 @@ class Set implements Countable, IteratorAggregate
         if (is_object($value)) {
             return spl_object_hash($value);
         }
+
+        if (is_array($value)) {
+            return $this->hashArray($value);
+        }
+
+        if (is_scalar($value)) {
+            return (string) crc32((string) $value);
+        }
+
         return serialize($value);
+    }
+
+    /**
+     * Recursively hashes an array to produce a unique key string.
+     *
+     * @param array $array The array to hash.
+     * @return string The hashed string representing the array.
+     */
+    private function hashArray(array $array): string
+    {
+        $hashes = [];
+        foreach ($array as $key => $value) {
+            $hashes[] = $this->getKey($key) . '=>' . $this->getKey($value);
+        }
+
+        return hash('crc32b', implode(',', $hashes));
     }
 
     /**
@@ -248,7 +274,13 @@ class Set implements Countable, IteratorAggregate
      */
     public function __serialize(): array
     {
-        return array_values($this->items);
+        $serializedItems = [];
+
+        foreach ($this->items as $key => $value) {
+            $serializedItems[$key] = is_object($value) ? serialize($value) : $value;
+        }
+
+        return $serializedItems;
     }
 
     /**
@@ -260,8 +292,9 @@ class Set implements Countable, IteratorAggregate
     public function __unserialize(array $data): void
     {
         $this->items = [];
-        foreach ($data as $item) {
-            $this->add($item);
+
+        foreach ($data as $key => $value) {
+            $this->items[$key] = is_string($value) && strpos($value, 'O:') === 0 ? unserialize($value) : $value;
         }
     }
 }
