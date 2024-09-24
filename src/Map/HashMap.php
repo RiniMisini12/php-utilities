@@ -19,7 +19,7 @@ class HashMap implements Countable, IteratorAggregate
     /**
      * Default initial capacity for the bucket array.
      */
-    private const INITIAL_CAPACITY = 17; // Prime number for better distribution
+    private const INITIAL_CAPACITY = 17;
 
     /**
      * The load factor determines when the HashMap will be resized (default: 0.75).
